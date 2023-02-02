@@ -1,4 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { add, remove } from 'redux/contacts/contactsSlice';
+import { namesFilter } from 'redux/filter/filterSlice';
+
 import { nanoid } from 'nanoid';
 import ContactForm from 'components/ContactForm.jsx/ContactForm';
 import { Section } from 'components/Section/Section';
@@ -7,11 +11,11 @@ import { ContactsList } from 'components/ContactsList/ContactsList';
 import { Filter } from 'components/Filter/Filter';
 
 export default function App() {
-  const [contacts, setContacts] = useState(
-    () => JSON.parse(window.localStorage.getItem('contacts')) ?? []
-  );
-  const [filter, setFilter] = useState('');
   const isInitRef = useRef(true);
+
+  const contacts = useSelector(state => state.contacts);
+  const filter = useSelector(state => state.filter);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (isInitRef.current) {
@@ -25,15 +29,11 @@ export default function App() {
     const newContact = { id: nanoid(5), name, number };
 
     if (contacts.some(contact => contact.name === name)) {
-      alert(`${name} is already in contacts.`);
+      return alert(`${name} is already in contacts.`);
     } else {
-      setContacts(contacts => [...contacts, newContact]);
+      dispatch(add(newContact));
       resetForm();
     }
-  };
-
-  const filterChange = event => {
-    setFilter(event.currentTarget.value);
   };
 
   const getVisibleContacts = () => {
@@ -44,21 +44,20 @@ export default function App() {
     );
   };
 
-  const deleteContact = contactId => {
-    setContacts(contacts => contacts.filter(({ id }) => id !== contactId));
-  };
-
   return (
     <AppStyled>
       <h1>Phonebook</h1>
       <ContactForm onSubmit={addContact} />
 
       <Section title="Contacts">
-        <Filter filter={filter} onChange={filterChange} />
+        <Filter
+          filter={filter}
+          onChange={event => dispatch(namesFilter(event.currentTarget.value))}
+        />
 
         <ContactsList
           contacts={getVisibleContacts()}
-          onDeleteButton={deleteContact}
+          onDeleteButton={id => dispatch(remove(id))}
         ></ContactsList>
       </Section>
     </AppStyled>
