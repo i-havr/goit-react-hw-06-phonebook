@@ -5,7 +5,7 @@ import { ContactsListItem } from 'components/ContactsListItem/ContactsListItem';
 export const ContactsList = ({ contacts, onDeleteButton }) => {
   return (
     <ContactsListStyled>
-      {contacts.map(({ id, name, number }) => {
+      {contacts?.map(({ id, name, number }) => {
         return (
           <ContactsListItem
             key={id}

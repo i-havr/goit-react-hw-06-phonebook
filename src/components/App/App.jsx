@@ -1,7 +1,6 @@
-import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { add, remove } from 'redux/contacts/contactsSlice';
-import { namesFilter } from 'redux/filter/filterSlice';
+import { add, remove, getContacts } from 'redux/contacts/contactsSlice';
+import { namesFilter, getFilter } from 'redux/filter/filterSlice';
 
 import { nanoid } from 'nanoid';
 import ContactForm from 'components/ContactForm.jsx/ContactForm';
@@ -11,24 +10,15 @@ import { ContactsList } from 'components/ContactsList/ContactsList';
 import { Filter } from 'components/Filter/Filter';
 
 export default function App() {
-  const isInitRef = useRef(true);
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
 
-  const contacts = useSelector(state => state.contacts);
-  const filter = useSelector(state => state.filter);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (isInitRef.current) {
-      isInitRef.current = false;
-      return;
-    }
-    window.localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
 
   const addContact = ({ name, number }, resetForm) => {
     const newContact = { id: nanoid(5), name, number };
 
-    if (contacts.some(contact => contact.name === name)) {
+    if (contacts?.some(contact => contact.name === name)) {
       return alert(`${name} is already in contacts.`);
     } else {
       dispatch(add(newContact));
@@ -38,7 +28,6 @@ export default function App() {
 
   const getVisibleContacts = () => {
     const normalizedFilter = filter.toLowerCase();
-
     return contacts?.filter(({ name }) =>
       name.toLowerCase().includes(normalizedFilter)
     );
